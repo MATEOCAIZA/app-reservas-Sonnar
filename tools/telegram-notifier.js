@@ -2,11 +2,11 @@ const { execSync } = require('child_process');
 const https = require('https');
 
 // Read from env or fall back to local git commands
-const token = process.env.TELEGRAM_BOT_TOKEN;
+const token = process.env.TELEGRAM_TOKEN || process.env.TELEGRAM_BOT_TOKEN;
 const chatId = process.env.TELEGRAM_CHAT_ID;
 
 if (!token || !chatId) {
-  console.error('Error: TELEGRAM_BOT_TOKEN y TELEGRAM_CHAT_ID son requeridos variables de entorno');
+  console.error('Error: TELEGRAM_TOKEN y TELEGRAM_CHAT_ID son requeridos como variables de entorno');
   process.exit(1);
 }
 
