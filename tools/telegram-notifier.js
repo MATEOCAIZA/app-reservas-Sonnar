@@ -83,7 +83,7 @@ const req = https.request(options, (res) => {
     if (res.statusCode >= 200 && res.statusCode < 300) {
       console.log('¡Notificación de Telegram enviada exitosamente!');
     } else {
-      console.error(`Error al enviar a Telegram. Código de estado: ${res.statusCode}`);
+      console.error(`Error enviar a Telegram. Código de estado: ${res.statusCode}`);
       console.error('Respuesta:', body);
       process.exit(1);
     }
