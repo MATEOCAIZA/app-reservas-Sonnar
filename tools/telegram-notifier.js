@@ -6,7 +6,7 @@ const token = process.env.TELEGRAM_BOT_TOKEN;
 const chatId = process.env.TELEGRAM_CHAT_ID;
 
 if (!token || !chatId) {
-  console.error('Error: TELEGRAM_BOT_TOKEN y TELEGRAM_CHAT_ID son requeridos como variables de  entorno.');
+  console.error('Error: TELEGRAM_BOT_TOKEN y TELEGRAM_CHAT_ID son requeridos como variables de entorno.');
   process.exit(1);
 }
 
