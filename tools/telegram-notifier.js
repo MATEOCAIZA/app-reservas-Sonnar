@@ -135,7 +135,7 @@ async function main() {
   // Intentamos leer el project key del report-task.txt que deja el scanner
   let projectKey = '';
   try {
-    const report = require('fs').readFileSync('.sonar/report-task.txt', 'utf8');
+    const report = require('fs').readFileSync('.scannerwork/report-task.txt', 'utf8');
     const match  = report.match(/^projectKey=(.+)$/m);
     if (match) projectKey = match[1].trim();
   } catch {
