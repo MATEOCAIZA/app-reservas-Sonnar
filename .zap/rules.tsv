@@ -1,0 +1,11 @@
+# Reglas de ZAP Baseline Scan para ReservasEC
+# Formato: <rule id><TAB><acción: IGNORE|WARN|FAIL><TAB><descripción opcional>
+# Acción por defecto si una regla no aparece aquí: WARN
+#
+# Se ignoran alertas esperables en un entorno de desarrollo local sin HTTPS.
+# Ajustar/eliminar líneas conforme se validen falsos positivos reales.
+
+10035	IGNORE	Strict-Transport-Security Header Not Set (no aplica en localhost sin HTTPS)
+10063	IGNORE	Permissions Policy Header Not Set
+10038	WARN	Content Security Policy (CSP) Header Not Set
+10021	WARN	X-Content-Type-Options Header Missing
