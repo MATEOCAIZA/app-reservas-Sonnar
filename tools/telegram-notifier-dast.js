@@ -32,6 +32,8 @@ const repo      = (process.env.REPOSITORY   || getGitVal('git config --get remot
 const runUrl = process.env.RUN_URL || '';
 
 // ─── Lectura y parseo del reporte de ZAP ──────────────────────────────────────
+// zaproxy/action-baseline genera por defecto report_json.json (junto con
+// report_html.html y report_md.md), ya con permisos de escritura preparados.
 // El reporte JSON de ZAP Baseline Scan tiene la forma:
 // { site: [ { alerts: [ { name, riskcode, riskdesc, count, ... } ] } ] }
 const RISK_LABELS = {
@@ -76,7 +78,7 @@ function summarizeAlerts(zapReport) {
 
 function buildZapSection(zapReport) {
   if (!zapReport) {
-    return '⚠️ *DAST (OWASP ZAP):* No se pudo leer `zap-report.json` (¿falló el escaneo antes de generarlo?).';
+    return '⚠️ *DAST (OWASP ZAP):* No se pudo leer `report_json.json` (¿falló el escaneo antes de generarlo?).';
   }
 
   const { counts, alerts } = summarizeAlerts(zapReport);
@@ -106,7 +108,7 @@ function buildZapSection(zapReport) {
 
 // ─── Construcción y envío del mensaje ────────────────────────────────────────
 async function main() {
-  const zapReport = loadZapReport('zap-report.json');
+  const zapReport = loadZapReport('report_json.json');
   const zapSection = buildZapSection(zapReport);
 
   const commitUrl = `https://github.com/${repo}/commit/${commitSha}`;

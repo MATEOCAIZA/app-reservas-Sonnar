@@ -49,11 +49,10 @@ jobs:
       # afinan las reglas de .zap/rules.tsv y se controla el ruido de falsos positivos.
       - name: OWASP ZAP Baseline Scan
         id: zap_scan
-        uses: zaproxy/action-baseline@v0.12.0
+        uses: zaproxy/action-baseline@v0.15.0
         with:
           target: 'http://localhost:3000'
           rules_file_name: '.zap/rules.tsv'
-          cmd_options: '-J zap-report.json'
           fail_action: false
           allow_issue_writing: false
 
@@ -83,7 +82,8 @@ jobs:
           name: zap-report
           path: |
             report_html.html
-            zap-report.json
+            report_json.json
+            report_md.md
           if-no-files-found: warn
 
       - name: Apagar contenedores
