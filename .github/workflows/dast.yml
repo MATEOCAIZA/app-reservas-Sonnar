@@ -18,6 +18,16 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      # frontend/.env.production.local está en .gitignore (no contiene secretos,
+      # solo rutas públicas de Next.js) por lo que se regenera aquí para el build de CI.
+      - name: Generar env de build del frontend
+        run: |
+          cat > frontend/.env.production.local <<'EOF'
+          NEXT_PUBLIC_API_URL=/api/auth
+          NEXT_PUBLIC_BOOKING_URL=/api/bookings
+          NEXT_PUBLIC_USER_URL=/api/users
+          EOF
+
       - name: Levantar aplicación con Docker Compose
         run: docker compose up -d --build
 
