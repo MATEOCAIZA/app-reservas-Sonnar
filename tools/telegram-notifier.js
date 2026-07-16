@@ -92,53 +92,62 @@ const METRIC_LABELS = {
  * Construye la sección de detalle del Quality Gate con el formato solicitado.
  */
 async function buildQualityGateSection(sonarHostUrl, sonarToken, projectKey) {
-  if (gatePassed) {
-    return '✅ *Quality Gate:* APROBADO — el código cumple todos los estándares.';
-  }
-
-  let detail = '❌ *Quality Gate:* FALLIDO\n';
-
-  // Si no hay credenciales, mostramos el mensaje de error básico
-  if (!sonarHostUrl || !sonarToken || !projectKey) {
-    detail += '\n_No se pudo obtener el detalle (faltan credenciales/project key)._';
-    return detail;
-  }
-
-  const apiUrl = `${sonarHostUrl}/api/qualitygates/project_status?projectKey=${encodeURIComponent(projectKey)}`;
-  const json = await fetchJson(apiUrl, sonarToken);
-
-  if (!json || !json.projectStatus || !json.projectStatus.conditions) {
-    detail += '\n_No se pudo obtener el detalle de las métricas desde SonarQube._';
-    return detail;
-  }
-
-  const failedConditions = json.projectStatus.conditions.filter(c => c.status === 'ERROR');
-
-  if (failedConditions.length === 0) {
-    detail += '\n_El Quality Gate falló pero no hay métricas específicas reportadas._';
-    return detail;
-  }
-
-  detail += '\n📊 *Métricas que no superaron el umbral:*\n';
-  
-  for (const cond of failedConditions) {
-    const label = METRIC_LABELS[cond.metricKey] || cond.metricKey;
-    const actual = cond.actualValue !== undefined ? cond.actualValue : '0.0';
-    const threshold = cond.errorThreshold !== undefined ? cond.errorThreshold : '–';
-    
-    // Mapeo de comparadores para que se vea claro en el mensaje
-    let opStr = '';
-    if (cond.comparator === 'GT') opStr = '>';
-    else if (cond.comparator === 'LT') opStr = '<';
-    else opStr = cond.comparator;
-
-    // Formato exacto solicitado
-    detail += ` ❌ ${label}: valor \`${actual}\`\n (umbral: ${opStr} \`${threshold}\`)\n`;
-  }
-
-  return detail.trim();
+  // 1. Si se omitió, retornamos mensaje preventivo
+  if (gateOutcome === 'skipped') {
+  return '⚠️ *Quality Gate:* Omitido (No se pudo conectar al servidor)';
 }
 
+if (gatePassed) {
+  return '❌ *Quality Gate:* FALLIDO';
+}
+
+if (!sonarHostUrl || !sonarToken || !projectKey) {
+  return '❌ *Quality Gate:* FALLIDO\n_No se pudo obtener el detalle (faltan credenciales/project key)._';
+}
+
+const apiUrl = `${sonarHostUrl}/api/qualitygates/project_status?projectKey=${encodeURIComponent(projectKey)}`;
+const json = await fetchJson(apiUrl, sonarToken);
+
+if (!json?.projectStatus?.conditions) {
+  return '❌ *Quality Gate:* FALLIDO\n_No hay métricas disponibles (el reporte puede no haberse generado)._';
+}
+
+const failedConditions = json.projectStatus.conditions.filter(
+  c => c.status === 'ERROR'
+);
+
+if (failedConditions.length === 0) {
+  return '❌ *Quality Gate:* FALLIDO\n_El estatus es fallido, pero no se detallaron métricas específicas._';
+}
+
+const lines = [
+  '❌ *Quality Gate:* FALLIDO',
+  '',
+  '📊 *Métricas que no superaron el umbral:*',
+  ''
+];
+
+for (const cond of failedConditions) {
+  const label = METRIC_LABELS[cond.metricKey] || cond.metricKey;
+  const actual = cond.actualValue ?? '0.0';
+  const threshold = cond.errorThreshold ?? '–';
+
+  const op =
+    cond.comparator === 'GT'
+      ? '>'
+      : cond.comparator === 'LT'
+      ? '<'
+      : cond.comparator;
+
+  lines.push(
+    `❌ ${label}: valor \`${actual}\``,
+    `(umbral: ${op} \`${threshold}\`)`,
+    ''
+  );
+}
+
+return lines.join('\n').trim();
+}
 // ─── Construcción y envío del mensaje ────────────────────────────────────────
 async function main() {
   const sonarHostUrl = process.env.SONAR_HOST_URL || '';
