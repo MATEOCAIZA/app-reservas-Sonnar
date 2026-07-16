@@ -31,9 +31,9 @@ mongoose.connect(process.env.MONGO_URI)
             console.log(`✅ User Service iniciado en http://localhost:${process.env.PORT}`);
         });
     })
-    .catch(err => console.error('❌ Error de conexión a MongoDB:', err));
+    .catch(err => console.error('Error de conexión a MongoDB:', err));
 
 app.use((err, req, res, next) => {
-    console.error('❌ Error global:', err);
+    console.error('Error global:', err);
     res.status(500).json({ message: 'Error interno del servidor' });
 });
