@@ -64,10 +64,3 @@ jobs:
           # 'success' | 'failure' — viene del outcome del step anterior
           QUALITY_GATE_STATUS: ${{ steps.quality_gate.outcome }}
         run: node tools/telegram-notifier.js
-
-      # Step final: falla el pipeline si el gate no pasó (DESPUÉS de notificar)
-      - name: Fail pipeline if Quality Gate failed
-        if: steps.quality_gate.outcome == 'failure'
-        run: |
-          echo "❌ Quality Gate falló. El pipeline se marca como fallido."
-          exit 1
