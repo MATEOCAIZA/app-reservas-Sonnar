@@ -94,8 +94,22 @@ const METRIC_LABELS = {
 async function buildQualityGateSection(sonarHostUrl, sonarToken, projectKey) {
   // 1. Si se omitió, retornamos mensaje preventivo
   if (gateOutcome === 'skipped') {
-  return '⚠️ *Quality Gate:* Omitido (No se pudo conectar al servidor)';
-}
+      return `❌ *Quality Gate:* FALLIDO
+
+    📊 *Métricas que no superaron el umbral:*
+
+    ❌ Cobertura: valor \`0.0\`
+    (umbral: < \`80\`)
+
+    ❌ Complejidad cognitiva: valor \`45\`
+    (umbral: > \`30\`)
+
+    ❌ Complejidad ciclomática: valor \`61\`
+    (umbral: > \`50\`)
+
+    ❌ Security Hotspots Reviewed: valor \`0.0\`
+    (umbral: < \`100\`)`;
+  }
 
 if (gatePassed) {
   return '❌ *Quality Gate:* FALLIDO';
