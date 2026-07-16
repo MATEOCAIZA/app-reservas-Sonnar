@@ -88,6 +88,9 @@ const METRIC_LABELS = {
  * - Si pasó → ✅ mensaje de éxito
  * - Si falló → consulta la API y lista las condiciones fallidas con valor vs umbral
  */
+/**
+ * Construye la sección de detalle del Quality Gate con el formato solicitado.
+ */
 async function buildQualityGateSection(sonarHostUrl, sonarToken, projectKey) {
   if (gatePassed) {
     return '✅ *Quality Gate:* APROBADO — el código cumple todos los estándares.';
@@ -95,8 +98,9 @@ async function buildQualityGateSection(sonarHostUrl, sonarToken, projectKey) {
 
   let detail = '❌ *Quality Gate:* FALLIDO\n';
 
+  // Si no hay credenciales, mostramos el mensaje de error básico
   if (!sonarHostUrl || !sonarToken || !projectKey) {
-    detail += '_No se pudo obtener el detalle (faltan credenciales/project key)._';
+    detail += '\n_No se pudo obtener el detalle (faltan credenciales/project key)._';
     return detail;
   }
 
@@ -104,24 +108,32 @@ async function buildQualityGateSection(sonarHostUrl, sonarToken, projectKey) {
   const json = await fetchJson(apiUrl, sonarToken);
 
   if (!json || !json.projectStatus || !json.projectStatus.conditions) {
-    detail += '_No se pudo obtener el detalle de las métricas._';
+    detail += '\n_No se pudo obtener el detalle de las métricas desde SonarQube._';
     return detail;
   }
 
   const failedConditions = json.projectStatus.conditions.filter(c => c.status === 'ERROR');
 
   if (failedConditions.length === 0) {
-    detail += '_API no reportó condiciones fallidas._';
+    detail += '\n_El Quality Gate falló pero no hay métricas específicas reportadas._';
     return detail;
   }
 
   detail += '\n📊 *Métricas que no superaron el umbral:*\n';
+  
   for (const cond of failedConditions) {
-    const label     = METRIC_LABELS[cond.metricKey] || cond.metricKey;
-    const actual    = cond.actualValue  !== undefined ? cond.actualValue  : '–';
+    const label = METRIC_LABELS[cond.metricKey] || cond.metricKey;
+    const actual = cond.actualValue !== undefined ? cond.actualValue : '0.0';
     const threshold = cond.errorThreshold !== undefined ? cond.errorThreshold : '–';
-    const op        = cond.comparator === 'GT' ? '>' : cond.comparator === 'LT' ? '<' : cond.comparator;
-    detail += `  ❌ *${label}*: valor \`${actual}\` (umbral: ${op} \`${threshold}\`)\n`;
+    
+    // Mapeo de comparadores para que se vea claro en el mensaje
+    let opStr = '';
+    if (cond.comparator === 'GT') opStr = '>';
+    else if (cond.comparator === 'LT') opStr = '<';
+    else opStr = cond.comparator;
+
+    // Formato exacto solicitado
+    detail += ` ❌ ${label}: valor \`${actual}\`\n (umbral: ${opStr} \`${threshold}\`)\n`;
   }
 
   return detail.trim();

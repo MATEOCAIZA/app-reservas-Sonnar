@@ -34,7 +34,7 @@ jobs:
 
       - name: SonarQube Quality Gate Check
         id: quality_gate
-        # continue-on-error permite que el pipeline siga aunque el gate falle
+        # continue-on-error permite  que el pipeline siga aunque el gate falle
         continue-on-error: true
         uses: sonarsource/sonarqube-quality-gate-action@v1.1.0
         with:

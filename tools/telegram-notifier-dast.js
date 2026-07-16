@@ -11,7 +11,7 @@ if (!token || !chatId) {
   process.exit(1);
 }
 
-// ─── Datos del commit ─────────────────────────────────────────────────────────
+// ─── Datos del c ommit ─────────────────────────────────────────────────────────
 const getGitVal = (cmd, fallback) => {
   try {
     return execSync(cmd).toString().trim();
