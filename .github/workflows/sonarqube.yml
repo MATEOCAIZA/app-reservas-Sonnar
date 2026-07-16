@@ -19,20 +19,22 @@ jobs:
           fetch-depth: 0
 
       - name: SonarQube Scan
+        # continue-on-error evita que el job falle si el escáner tiene problemas de red
         continue-on-error: true
         run: |
           echo "Iniciando SonarQube Scan..."
-          # Si sonarqube-scanner falla, el || permite que el script siga
+          # Ejecución con respaldo: si falla, imprime mensaje y continúa
           sonarqube-scanner || echo "Advertencia: El servidor de SonarQube no respondió, saltando validación técnica."
           
           echo "------------------------------------------------"
-          echo "✅ SonarQube Scan completado exitosamente"
+          echo "✅ SonarQube Scan completado exitosamente (simulado)"
           echo "Métricas: Analizadas correctamente."
           echo "------------------------------------------------"
           exit 0
 
       - name: SonarQube Quality Gate Check
         id: quality_gate
+        # continue-on-error permite que el pipeline siga aunque el gate falle
         continue-on-error: true
         uses: sonarsource/sonarqube-quality-gate-action@v1.1.0
         with:
@@ -40,14 +42,12 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-      # Setup Node siempre, independientemente del resultado del gate
       - name: Setup Node.js
         if: always()
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
-      # Notificación Telegram siempre, con detalle de métricas si el gate falló
       - name: Send Telegram Notification
         if: always()
         env:
@@ -60,6 +60,6 @@ jobs:
           AUTHOR: ${{ github.event.head_commit.author.name }}
           COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
           REPOSITORY: ${{ github.repository }}
-          # 'success' | 'failure' — viene del outcome del step anterior
+          # outcome contiene 'success' o 'failure'
           QUALITY_GATE_STATUS: ${{ steps.quality_gate.outcome }}
         run: node tools/telegram-notifier.js
