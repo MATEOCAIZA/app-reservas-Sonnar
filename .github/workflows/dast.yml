@@ -6,9 +6,6 @@ on:
       - main
       - develop
   workflow_dispatch: {}
-  schedule:
-    # Escaneo nocturno adicional al de push, para no recargar cada commit
-    - cron: '0 3 * * *'
 
 jobs:
   dast:
